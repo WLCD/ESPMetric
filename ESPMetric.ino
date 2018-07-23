@@ -1,52 +1,53 @@
-#include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
+// ALL libs are defined there
+#include "init.h"
 
-#include <Adafruit_GFX.h>
-#include <Adafruit_NeoMatrix.h>
-#include <Adafruit_NeoPixel.h>
+//constantes
 
-#include "JsonListener.h"
-#include "WorldClockClient.h"
+//pin DATA de l'ESP reliée a DIN sur la matrice
+#define PINMATRIX 14
+
+//boutons
+#define PINBTLEFT 5
+#define PINBTCENTER 4
+#define PINBTRIGHT 15
+
+//Verbose DEBUG (bool)
+#define DEBUG  1
+
+//timezone ids
 String timeZoneIds [] = {"America/New_York", "Europe/London", "Europe/Paris", "Australia/Sydney"};
-WorldClockClient worldClockClient("de", "CH", "E, dd. MMMMM yyyy", 3, timeZoneIds);
 
-#include "WundergroundClient.h"
+// set you date formatting here (language, country, full day, date, number of timezones, time zonde ids ) - configuration du formatage de la date (langue, pays, nom du jour complet, date, nombre de timezones, ids de timezone
+WorldClockClient worldClockClient("fr", "FR", "E, dd. MMMMM yyyy", 3, timeZoneIds);
+
+// remplacement de WU par openweather map ?
 bool changeMeteo=false;
+
+//insert you WU API key here - saisissez votre clé d'API WU ici
 const String  WUNDERGRROUND_API_KEY = "c88515956a30c5e9";
 const boolean IS_METRIC = true;
+
+//zmw code ajouter procedure
 const String  WUNDERGROUND_ZMW_CODE = "00000.123.07747";
 const String WUNDERGRROUND_LANGUAGE = "FR";
 String meteoDatas [3];
 WundergroundClient wunderground(IS_METRIC);
 
-#include <ArduinoJson.h>
-#include "FS.h"
-
-#define PINMATRIX 14
-
-#define PINBTLEFT 5
-#define PINBTCENTER 4
-#define PINBTRIGHT 15
-
-#define DEBUG  1
-
+// démarrage serveur web sur le port 80
 ESP8266WebServer server(80);
 
-
-extern "C" {
-#include "user_interface.h"
-}
-
+// initialisation du timer
 os_timer_t myTimer;
   
+// instanciation des modules
 void youtube(void);
+//Youtube::init(){};
 void hours(void);
 void counter(void);
 void meteo(void);
 void rss(void);
 
+// assignation de la config 
 String VERSION="1.01a";
 const char* WIFISSIDValue;
 const char* WIFIpassword;
@@ -117,7 +118,7 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32,8, PINMATRIX,
 uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(255, 210, 0),matrix.Color(0, 0, 255), matrix.Color(255, 0, 255), matrix.Color(0, 255, 255), matrix.Color(255, 255, 255),matrix.Color(91, 68, 43),matrix.Color(0, 0, 0)};
 
-
+//icones
 static unsigned char play[]={0x00,0x00,0x10,0x18,0x1c,0x18,0x10,0x00};
 static unsigned char rond[]={0x00,0x7e,0xff,0xff,0xff,0xff,0xff,0x7e};
 static unsigned char kk[]={0x04,0x00,0x18,0x3c,0x3c,0x7e,0x7e,0x00};
@@ -126,6 +127,7 @@ static unsigned char sun[]={0x24,0x00,0xbd,0x7e,0x7e,0x7e,0x00,0x00};
 static unsigned char mask[]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
 static unsigned char cloud[]={0x00,0x00,0x00,0x06,0x6f,0xef,0xff,0x7e};
 
+//??
 int countRss=0;
 String tabRss[2];
 
@@ -133,12 +135,15 @@ typedef void (*SimpleApplicationsList[])();
 SimpleApplicationsList Applications = { hours, rss,meteo };
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
+//page d'accueil ESPMetric a déporter dans le SPIFFS au format html pour favorider la lecture du code
 char serverIndex[512]="<h1>ESPMetric Config</h1><ul><li><a href='params'>Config ESPMetric</a></li><li><a href='update'>Flash ESPIOT</a></li></ul><br><br>Version: 1.01a<br><a href='https://github.com/fairecasoimeme/' target='_blank'>Documentation</a>";
 char serverIndexUpdate[256] = "<h1>ESPMetric Config</h1><h2>Update Firmware</h2><form method='POST' action='/updateFile' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
 char serverIndexConfig[1024] = "<h1>ESPMetric Config</h1><h2>Config ESPIOT</h2><form method='POST' action='/config'>SSID : <br><input type='text' name='ssid'><br>Pass : <br><input type='password' name='pass'><br>@IP : <br><input type='text' name='ip'><br>Mask : <br><input type='text' name='mask'><br>@GW : <br><input type='text' name='gw'><br>Http user : <br><input type='text' name='userhttp'><br>Http pass : <br><input type='text' name='passhttp'><br>URL : <br><input type='text' name='url'><br><input type='submit' value='OK'></form>";
 
+//feuille de style
 const char* Style = "<style>body {  text-align: center; font-family:Arial, Tahoma;  background-color:#f0f0f0;}ul li { border:1px solid gray;  height:30px;  padding:3px;  list-style: none;}ul li a { text-decoration: none;}input{ border:1px solid gray;  height:25px;}input[type=text] { width:150px;  padding:5px;  font-size:10px;}#url {  width:300px;}</style>";
 
+//??
 uint8_t sec=0;
 uint8_t minute10=0;
 bool minOccured;
@@ -253,6 +258,7 @@ bool loadConfig() {
   return true;
 }
 
+//actions des boutons
 void nextAppli()
 {
   // add one to the current pattern number, and wrap around at the end
@@ -297,6 +303,7 @@ void rightButton()
    
 }
 
+// en attente de connexion wifi ?
 void wifiWait()
 {
   matrix.fillScreen(0);
@@ -306,6 +313,7 @@ void wifiWait()
   matrix.show();
 }
 
+//initialisation de la config
 void setup() {
   matrix.begin();
   matrix.setTextWrap(false);
@@ -362,14 +370,13 @@ void setup() {
   
   attachInterrupt(PINBTLEFT, leftButton, CHANGE); 
   attachInterrupt(PINBTCENTER, centerButton, CHANGE); 
-  attachInterrupt(PINBTRIGHT, rightButton, RISING); 
+  attachInterrupt(PINBTRIGHT, rightButton, RISING);
+  //vitesse de l'interface série a basculer sur 115200 ou plus pour les transferts de fichiers vers le SPIFFS 
   Serial.begin(9600);
 
    user_init();
  
 }
-
-
 
 void loop() {
   server.handleClient();
@@ -398,7 +405,7 @@ void loop() {
         {
           delay(500);
           if (DEBUG)
-            Serial.print(".");
+            Serial.print("en attente");
           retryWifi++;
         }else{
           EndCheck=true;
@@ -414,7 +421,12 @@ void loop() {
         ntpRequest();
         meteoUpdate();
         if (DEBUG)
-          Serial.println("Connexion OK"); 
+          //If connection successful show IP address in serial monitor
+            Serial.println("");
+            Serial.print("Connected to ");
+            Serial.println(WiFi.SSID()); //network we're connected to
+            Serial.print("IP address: ");
+            Serial.println(WiFi.localIP());  //IP address assigned to your ESP 
       }
    }else{
       if (brightnessAnalog<200)
@@ -493,36 +505,40 @@ void loop() {
 
 
 
-
+//plugin youtube a externaliser
 void youtube()
 {
   matrix.setTextColor(colors[0]);
   matrix.setCursor(8, positionReel);
+
+  //implement youtube subscribers counter
   matrix.print(F("test"));
   matrix.drawBitmap(0, positionReel,  rond, 8,8,colors[0]);
   matrix.drawBitmap(0, positionReel,  play, 8,8,colors[6]);
   
 }
 
-
+//plugin WU
 void meteoUpdate()
 {
   wunderground.updateConditions(WUNDERGRROUND_API_KEY, WUNDERGRROUND_LANGUAGE, WUNDERGROUND_ZMW_CODE);
   meteoDatas [0] = wunderground.getCurrentTemp();
-  meteoDatas [1] =wunderground.getHumidity(); 
+  meteoDatas [1] = wunderground.getHumidity(); 
   meteoDatas [2] = wunderground.getPressure();
 }
 
+//plugin horloge
 void ntpRequest()
 {
   worldClockClient.updateTime();
 }
 
+//parsing du flux RSS
 void rssUpdate()
 {
   WiFiClient client;
   if (!client.connect("www.lemonde.fr", 80)) {
-    Serial.println("connection failed");
+    Serial.println("connection to rss stream failed");
     return;
   }
 
@@ -595,6 +611,7 @@ void rssUpdate()
   
 }
 
+//affichage du flux rss
 int tmpRssX=0;
 void rss()
 {
@@ -609,6 +626,7 @@ void rss()
   }
 }
 
+//plugin horloge
 void hours()
 {
   
@@ -617,6 +635,7 @@ void hours()
   matrix.print(worldClockClient.getHours(2) + ":" + worldClockClient.getMinutes(2));
 }
 
+//plugin compteur
 void counter()
 {
   matrix.setTextColor(colors[7]);
@@ -687,7 +706,7 @@ void meteo()
 }
 
 
-
+//standalone AP
 void setupWifiAP()
 {
   WiFi.mode(WIFI_AP);
@@ -714,6 +733,7 @@ void setupWifiAP()
   WiFi.softAP(AP_NameChar,WIFIPASS );
 }
 
+//config serveur WEB
 void serverWebCfg()
 {
   char* host = "espiot";
@@ -724,14 +744,20 @@ void serverWebCfg()
       server.sendHeader("Connection", "close");
        server.send(200, "text/html", strcat(serverIndex,Style));
     });
+
+    //ouverture du formulaire de mise à jour OTA
     server.on("/update", HTTP_GET, [](){
       server.sendHeader("Connection", "close");
       server.send(200, "text/html", strcat(serverIndexUpdate,Style));
     });
+
+    //page de configuration pour le WIFI
     server.on("/params", HTTP_GET, [](){
       server.sendHeader("Connection", "close");
       server.send(200, "text/html", strcat(serverIndexConfig,Style));
     });
+    
+    //génération du fichier config.json et ecriture dansle SPIFFS
      server.on("/config", HTTP_POST, [](){
       
        String StringConfig;
@@ -754,7 +780,8 @@ void serverWebCfg()
        }
 
        StringConfig = "{\"ID\":\""+String(tmpMAC)+"\",\"WIFISSID\":\""+ssid+"\",\"WIFIpass\":\""+pass+"\",\"Ip\":\""+ip+"\",\"Mask\":\""+mask+"\",\"GW\":\""+gw+"\",\"urlServer\":\""+url+"\",\"HTTPUser\":\""+userhttp+"\",\"HTTPPass\":\""+passhttp+"\"}";       
-       
+
+       //voir Arduino JSON -> buffer géré différment dansla dernière version
        StaticJsonBuffer<512> jsonBuffer;
        JsonObject& json = jsonBuffer.parseObject(StringConfig);
        File configFile = SPIFFS.open("/config.json", "w");
@@ -769,7 +796,8 @@ void serverWebCfg()
       
       server.send(200, "text/plain", "OK");
     });
-   
+
+   //fonction de mise à jour OTA a déplacer dans un fichier dédié
     server.on("/updateFile", HTTP_POST, [](){
       server.sendHeader("Connection", "close");
       server.send(200, "text/plain", (Update.hasError())?"FAIL":"OK");
