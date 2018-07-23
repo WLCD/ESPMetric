@@ -1,3 +1,4 @@
+
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
@@ -5,7 +6,7 @@
 #include <ArduinoJson.h>
 #include "FS.h"
 #include "JsonListener.h"
-#include "MatrixConfig.h"
+#include "Matrix.cpp"
 #include "Pluginhandler.h"
 #include "Config.h"
 //transfer wifi handling to this file
@@ -14,3 +15,5 @@
 extern "C" {
 #include "user_interface.h"
 }
+
+

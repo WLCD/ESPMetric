@@ -110,13 +110,13 @@ int action=0;
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 
 
-Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32,8, PINMATRIX,
+/*Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32,8, PINMATRIX,
   NEO_MATRIX_TOP    + NEO_MATRIX_LEFT+
   NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
   NEO_GRB            + NEO_KHZ800);
 
 uint16_t colors[] = {
-  matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(255, 210, 0),matrix.Color(0, 0, 255), matrix.Color(255, 0, 255), matrix.Color(0, 255, 255), matrix.Color(255, 255, 255),matrix.Color(91, 68, 43),matrix.Color(0, 0, 0)};
+  matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(255, 210, 0),matrix.Color(0, 0, 255), matrix.Color(255, 0, 255), matrix.Color(0, 255, 255), matrix.Color(255, 255, 255),matrix.Color(91, 68, 43),matrix.Color(0, 0, 0)};*/
 
 //icones
 static unsigned char play[]={0x00,0x00,0x10,0x18,0x1c,0x18,0x10,0x00};
