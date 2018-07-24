@@ -1,25 +1,24 @@
 // ALL libs are defined there
 #include "init.h"
 
-//constantes
-
-//pin DATA de l'ESP reliée a DIN sur la matrice
-#define PINMATRIX 14
+//Verbose DEBUG (bool)
+#define DEBUG  1
 
 //boutons
 #define PINBTLEFT 5
 #define PINBTCENTER 4
 #define PINBTRIGHT 15
 
-//Verbose DEBUG (bool)
-#define DEBUG  1
-
+/** WorldClockClient START **/
 //timezone ids
 String timeZoneIds [] = {"America/New_York", "Europe/London", "Europe/Paris", "Australia/Sydney"};
 
 // set you date formatting here (language, country, full day, date, number of timezones, time zonde ids ) - configuration du formatage de la date (langue, pays, nom du jour complet, date, nombre de timezones, ids de timezone
 WorldClockClient worldClockClient("fr", "FR", "E, dd. MMMMM yyyy", 3, timeZoneIds);
 
+/** WorldClockClient END **/
+
+/* WU Client START */
 // remplacement de WU par openweather map ?
 bool changeMeteo=false;
 
@@ -32,6 +31,8 @@ const String  WUNDERGROUND_ZMW_CODE = "00000.123.07747";
 const String WUNDERGRROUND_LANGUAGE = "FR";
 String meteoDatas [3];
 WundergroundClient wunderground(IS_METRIC);
+
+/* WU Client END */
 
 // démarrage serveur web sur le port 80
 ESP8266WebServer server(80);
@@ -90,33 +91,6 @@ int nbAppli=0;
 int action=0;
 
 
-// MATRIX DECLARATION:
-// Parameter 1 = width of NeoPixel matrix
-// Parameter 2 = height of matrix
-// Parameter 3 = pin number (most are valid)
-// Parameter 4 = matrix layout flags, add together as needed:
-//   NEO_MATRIX_TOP, NEO_MATRIX_BOTTOM, NEO_MATRIX_LEFT, NEO_MATRIX_RIGHT:
-//     Position of the FIRST LED in the matrix; pick two, e.g.
-//     NEO_MATRIX_TOP + NEO_MATRIX_LEFT for the top-left corner.
-//   NEO_MATRIX_ROWS, NEO_MATRIX_COLUMNS: LEDs are arranged in horizontal
-//     rows or in vertical columns, respectively; pick one or the other.
-//   NEO_MATRIX_PROGRESSIVE, NEO_MATRIX_ZIGZAG: all rows/columns proceed
-//     in the same order, or alternate lines reverse direction; pick one.
-//   See example below for these values in action.
-// Parameter 5 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-
-
-/*Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(32,8, PINMATRIX,
-  NEO_MATRIX_TOP    + NEO_MATRIX_LEFT+
-  NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
-  NEO_GRB            + NEO_KHZ800);
-
-uint16_t colors[] = {
-  matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(255, 210, 0),matrix.Color(0, 0, 255), matrix.Color(255, 0, 255), matrix.Color(0, 255, 255), matrix.Color(255, 255, 255),matrix.Color(91, 68, 43),matrix.Color(0, 0, 0)};*/
 
 //icones
 static unsigned char play[]={0x00,0x00,0x10,0x18,0x1c,0x18,0x10,0x00};
@@ -131,11 +105,13 @@ static unsigned char cloud[]={0x00,0x00,0x00,0x06,0x6f,0xef,0xff,0x7e};
 int countRss=0;
 String tabRss[2];
 
+//creation de la liste des applications
 typedef void (*SimpleApplicationsList[])();
 SimpleApplicationsList Applications = { hours, rss,meteo };
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 //page d'accueil ESPMetric a déporter dans le SPIFFS au format html pour favorider la lecture du code
+//server.serveStatic("/", SPIFFS, "/index.html");
 char serverIndex[512]="<h1>ESPMetric Config</h1><ul><li><a href='params'>Config ESPMetric</a></li><li><a href='update'>Flash ESPIOT</a></li></ul><br><br>Version: 1.01a<br><a href='https://github.com/fairecasoimeme/' target='_blank'>Documentation</a>";
 char serverIndexUpdate[256] = "<h1>ESPMetric Config</h1><h2>Update Firmware</h2><form method='POST' action='/updateFile' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
 char serverIndexConfig[1024] = "<h1>ESPMetric Config</h1><h2>Config ESPIOT</h2><form method='POST' action='/config'>SSID : <br><input type='text' name='ssid'><br>Pass : <br><input type='password' name='pass'><br>@IP : <br><input type='text' name='ip'><br>Mask : <br><input type='text' name='mask'><br>@GW : <br><input type='text' name='gw'><br>Http user : <br><input type='text' name='userhttp'><br>Http pass : <br><input type='text' name='passhttp'><br>URL : <br><input type='text' name='url'><br><input type='submit' value='OK'></form>";
